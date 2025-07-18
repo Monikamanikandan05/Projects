@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Simple Quiz App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f7f7f7;
+      --card-bg: #ffffff;
+      --accent: #0078ff;
+      --accent-hover: #005fcc;
+      --correct: #2e8b57;
+      --wrong: #d9534f;
+      --text: #222;
+      --muted: #666;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .quiz-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      padding: 1.5rem;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+    .meta {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+    .question {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .options {
+      display: grid;
+      gap: .75rem;
+      margin-bottom: 1.5rem;
+    }
+    .option-btn {
+      display: block;
+      width: 100%;
+      padding: .75rem 1rem;
+      font-size: 1rem;
+      text-align: left;
+      background: #eee;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s, transform .05s;
+    }
+    .option-btn:hover {
+      background: #e0e0e0;
+      transform: translateY(-1px);
+    }
+    .option-btn.correct {
+      background: #e5f7ec;
+      border-color: var(--correct);
+      color: var(--correct);
+      cursor: default;
+    }
+    .option-btn.wrong {
+      background: #fdecec;
+      border-color: var(--wrong);
+      color: var(--wrong);
+      cursor: default;
+    }
+    .next-btn, .restart-btn {
+      display: inline-block;
+      padding: .75rem 1.25rem;
+      font-size: 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .next-btn:hover, .restart-btn:hover {
+      background: var(--accent-hover);
+    }
+    .hidden { display: none !important; }
+    .score {
+      font-size: 1.25rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="quiz-card">
+    <h1>Quiz App</h1>
+    <div id="quiz-meta" class="meta"></div>
+    <div id="quiz-body">
+      <div id="question-text" class="question"></div>
+      <div id="options" class="options"></div>
+      <button id="next-btn" class="next-btn hidden">Next ▶</button>
+    </div>
+    <div id="result-screen" class="hidden">
+      <div id="score-text" class="score"></div>
+      <button id="restart-btn" class="restart-btn">Restart 🔄</button>
+    </div>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "What does HTML stand for?",
+        options: [
+          "Hyper Trainer Marking Language",
+          "HyperText Markup Language",
+          "HyperText Markdown Language",
+          "Home Tool Markup Language"
+        ],
+        answer: 1
+      },
+      {
+        question: "Which tag is used to link a CSS file in HTML?",
+        options: ["<css>", "<style src=...>", "<link>", "<stylesheet>"],
+        answer: 2
+      },
+      {
+        question: "Inside which HTML element do we put JavaScript?",
+        options: ["<javascript>", "<script>", "<js>", "<code>"],
+        answer: 1
+      },
+      {
+        question: "Which of these is NOT a programming language?",
+        options: ["Python", "Java", "HTML", "C++"],
+        answer: 2
+      },
+      {
+        question: "How do you write a comment in JavaScript?",
+        options: ["<!-- comment -->", "// comment", "** comment **", "# comment"],
+        answer: 1
+      }
+    ];
+
+    let current = 0;      
+    let score = 0;         
+    let answered = false;  
+    const metaEl = document.getElementById('quiz-meta');
+    const qTextEl = document.getElementById('question-text');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const resultScreen = document.getElementById('result-screen');
+    const quizBody = document.getElementById('quiz-body');
+    const scoreText = document.getElementById('score-text');
+    const restartBtn = document.getElementById('restart-btn');
+    function renderQuestion() {
+      const q = questions[current];
+      metaEl.textContent = `Question ${current + 1} of ${questions.length}`;
+      qTextEl.textContent = q.question;
+      optionsEl.innerHTML = '';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => handleAnswer(idx, btn));
+        optionsEl.appendChild(btn);
+      });
+
+      answered = false;
+      nextBtn.classList.add('hidden');
+    }
+    function handleAnswer(selectedIdx, btnEl) {
+      if (answered) return; // ignore multiple clicks
+      answered = true;
+
+      const correctIdx = questions[current].answer;
+      const optionButtons = optionsEl.querySelectorAll('.option-btn');
+      optionButtons.forEach((b, i) => {
+        if (i === correctIdx) {
+          b.classList.add('correct');
+        }
+        if (i === selectedIdx && selectedIdx !== correctIdx) {
+          b.classList.add('wrong');
+        }
+        b.disabled = true;
+      });
+      if (selectedIdx === correctIdx) {
+        score++;
+      }
+
+      nextBtn.textContent = current < questions.length - 1 ? 'Next ▶' : 'See Results';
+      nextBtn.classList.remove('hidden');
+    }
+    nextBtn.addEventListener('click', () => {
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      quizBody.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+      scoreText.textContent = `You scored ${score} / ${questions.length}!`;
+    }
+    restartBtn.addEventListener('click', restartQuiz);
+
+    function restartQuiz() {
+      current = 0;
+      score = 0;
+      quizBody.classList.remove('hidden');
+      resultScreen.classList.add('hidden');
+      renderQuestion();
+    }
+    renderQuestion();
+  </script>
+</body>
+</html>
