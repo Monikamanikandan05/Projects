@@ -1,0 +1,34 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  padding: 20px;
+  background-color: #f0f8ff;
+}
+
+#word {
+  font-size: 32px;
+  margin: 20px;
+  letter-spacing: 10px;
+}
+
+#wrong-letters {
+  color: red;
+  font-size: 20px;
+  margin: 10px;
+}
+
+canvas {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+}
+
+#message {
+  font-size: 24px;
+  margin: 20px;
+  color: green;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+}
